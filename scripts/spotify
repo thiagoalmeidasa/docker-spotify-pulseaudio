@@ -1,27 +1,29 @@
 #!/usr/bin/env bash
 set -e
+mkdir -p "${HOME}/.spotify/{cache,config}"
 
-if [[ -n "$(docker ps -qaf 'name=spotify')" ]]; then
-	docker restart spotify
+CONTAINER_NAME=spotify
+
+if [[ -n "$(docker ps -qaf 'name='"$CONTAINER_NAME"'')" ]]; then
+  docker restart $CONTAINER_NAME
 else
-	USER_UID=$(id -u)
-	USER_GID=$(id -g)
-	xhost "si:localuser:${USER}"
+  USER_UID=$(id -u)
+  USER_GID=$(id -g)
+  xhost "si:localuser:${USER}"
 
-	[[ ${DBUS_SESSION_BUS_ADDRESS} =~ 'unix:path'\
-		 && -S ${DBUS_SESSION_BUS_ADDRESS#*=} ]]\
-		 && DBUS=${DBUS_SESSION_BUS_ADDRESS#*=}
+  [[ ${DBUS_SESSION_BUS_ADDRESS} =~ 'unix:path' && -S ${DBUS_SESSION_BUS_ADDRESS#*=} ]] &&
+    DBUS=${DBUS_SESSION_BUS_ADDRESS#*=}
 
-	docker run --rm --name spotify \
-		-e "USER_UID=${USER_UID}" \
-		-e "USER_GID=${USER_GID}" \
-		-e "DISPLAY=unix${DISPLAY}" \
-		-v /tmp/.X11-unix:/tmp/.X11-unix:ro \
-		-v "/run/user/${USER_UID}/pulse:/run/pulse:ro" \
-		-v "${HOME}/.spotify/config:/data/config" \
-		-v "${HOME}/.spotify/cache:/data/cache" \
-		${DBUS:+-v "${DBUS}:/run/dbus"} \
-		${DBUS:+-e "DBUS_SESSION_BUS_ADDRESS=/run/dbus"} \
-		--device /dev/dri \
-		spotify
+  docker run --rm --name spotify \
+    -e "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus" \
+    -v "/run/user/${USER_UID}/bus:/run/dbus" \
+    -e "DISPLAY=unix${DISPLAY}" \
+    -e "USER_GID=${USER_GID}" \
+    -e "USER_UID=${USER_UID}" \
+    -v "${HOME}/.spotify/cache:/data/cache" \
+    -v "${HOME}/.spotify/config:/data/config" \
+    -v "/run/user/${USER_UID}/pulse:/run/pulse:ro" \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
+    --device /dev/dri \
+    $CONTAINER_NAME
 fi
