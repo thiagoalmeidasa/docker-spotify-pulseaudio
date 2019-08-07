@@ -9,9 +9,10 @@ RUN apt-get update && apt-get install -y gnupg2 \
   && echo deb http://repository.spotify.com stable non-free > /etc/apt/sources.list.d/spotify.list \
   && apt-get update \
   && apt-get install -y \
-  spotify-client xdg-utils libxss1 \
-  pulseaudio \
   fonts-noto \
+  fonts-noto-color-emoji \
+  pulseaudio \
+  spotify-client xdg-utils libxss1 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && echo enable-shm=no >> /etc/pulse/client.conf
