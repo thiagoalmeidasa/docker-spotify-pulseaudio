@@ -1,0 +1,6 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Spotify
+Icon=$HOME/.local/share/icons/spotify/icon.png
+Exec=$HOME/.local/bin/spotify

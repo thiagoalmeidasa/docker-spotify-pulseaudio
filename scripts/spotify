@@ -3,8 +3,9 @@ set -e
 mkdir -p "${HOME}/.spotify/{cache,config}"
 
 CONTAINER_NAME=spotify
+IMAGE_NAME=spotify:ubuntu-20.04
 
-if [[ -n "$(docker ps -qaf 'name='"$CONTAINER_NAME"'')" ]]; then
+if [[ -n "$(docker ps -qaf 'name='"$CONTAINER_NAME"'' --filter 'ancestor='"$IMAGE_NAME"'')" ]]; then
   docker restart $CONTAINER_NAME
 else
   USER_UID=$(id -u)
@@ -14,7 +15,8 @@ else
   [[ ${DBUS_SESSION_BUS_ADDRESS} =~ 'unix:path' && -S ${DBUS_SESSION_BUS_ADDRESS#*=} ]] &&
     DBUS=${DBUS_SESSION_BUS_ADDRESS#*=}
 
-  docker run --rm --name spotify \
+  docker run --rm --name ${CONTAINER_NAME} \
+    -h $(hostname) \
     -e "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/dbus" \
     -v "/run/user/${USER_UID}/bus:/run/dbus" \
     -e "DISPLAY=unix${DISPLAY}" \
@@ -25,5 +27,5 @@ else
     -v "/run/user/${USER_UID}/pulse:/run/pulse:ro" \
     -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
     --device /dev/dri \
-    $CONTAINER_NAME
+    $IMAGE_NAME
 fi
