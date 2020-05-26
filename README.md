@@ -14,7 +14,7 @@ is achieved by sharing a socket for X11 and PulseAudio.
 2. Build the container:
 
   ```sh
-  sudo docker build -t spotify .
+  sudo docker build -t spotify:ubuntu-20.04 .
   ```
 
 3. Run the provided spotify script:
